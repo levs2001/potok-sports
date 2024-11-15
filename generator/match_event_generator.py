@@ -1,6 +1,8 @@
-import random
-import time
+import asyncio
 import json
+import random
+
+import websockets
 
 # Define the leagues and teams
 leagues = {
@@ -36,25 +38,71 @@ leagues = {
 }
 
 
-def generate_match_event() -> str:
+async def send_event(websocket, event):
+    e = json.dumps(event)
+    print(e)
+    await websocket.send(e)
+
+
+async def generate_match_events(websocket, first_goal_wait, other_match_time):
     # Select a random league
     league = random.choice(list(leagues.keys()))
 
     # Select two random teams from the chosen league
     teams = random.sample(leagues[league], 2)
-
-    # Simulate a goal event
-    old_score = "0 - 0"
-    new_score = "1 - 0" if random.choice([True, False]) else "0 - 1"
-
-    # Create the event dictionary
     event = {
-        "event_type": "goal",
+        "event_type": "match_start",
         "league": league,
         "teams": f"{teams[0]} - {teams[1]}",
-        "old_score": old_score,
-        "new_score": new_score
     }
+    await send_event(websocket, event)
+    await asyncio.sleep(first_goal_wait)
 
-    # Print the event in JSON format
-    return json.dumps(event, indent=2)
+    goals_count = random.randint(0, 4)
+    for i in range(goals_count):
+        random.randint(0, 9)
+        goal_author_team_b = random.choice([True, False])
+        if random.randint(0, 9) == 9:
+            # Шанс того, что команда забила в свои ворота 10 процентов.
+            missed_goal_team_b = goal_author_team_b
+        else:
+            missed_goal_team_b = not goal_author_team_b
+        event = {
+            "event_type": "goal",
+            "league": league,
+            "teams": f"{teams[0]} - {teams[1]}",
+            # Команда забившая гол
+            "goal_author_team": teams[int(goal_author_team_b)],
+            # Команда в чьи ворота забили
+            "missed_goal_team": teams[int(missed_goal_team_b)]
+        }
+        await send_event(websocket, event)
+        await asyncio.sleep(other_match_time / goals_count)
+        await send_event(websocket, event)
+
+    if goals_count == 0:
+        await asyncio.sleep(other_match_time)
+    event = {
+        "event_type": "match_end",
+        "league": league,
+        "teams": f"{teams[0]} - {teams[1]}",
+    }
+    await send_event(websocket, event)
+
+
+MATCHES_IN_ONE_TIME = 5
+FIRST_GOAL_WAIT = 2
+OTHER_MATCH_TIME = 8
+
+
+async def main():
+    async with websockets.connect('ws://localhost:8765') as websocket:
+        while True:
+            async with asyncio.TaskGroup() as tg:
+                for i in range(MATCHES_IN_ONE_TIME):
+                    tg.create_task(generate_match_events(websocket, FIRST_GOAL_WAIT, OTHER_MATCH_TIME))
+            await asyncio.sleep(10)
+
+
+if __name__ == '__main__':
+    asyncio.get_event_loop().run_until_complete(main())

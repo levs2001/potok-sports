@@ -1,30 +1,30 @@
-import time
+import asyncio
+import websockets
 
-from generator.match_event_generator import generate_match_event
 from confluent_kafka import Producer
 
-FLUSH_THRESHOLD = 10
+topic = 'football_events'
+producer = Producer({
+    'bootstrap.servers': 'localhost:9092'
+})
 
 
-def main():
-    topic = 'football_events'
+async def handler(websocket, path):
+    print("Client connected")
 
-    producer = Producer({
-        'bootstrap.servers': 'localhost:9092'
-    })
-
-    while True:
-        for i in range(FLUSH_THRESHOLD):
-            event = generate_match_event()
-            print(event)
-            producer.produce(topic=topic, value=event.encode('utf-8'))
-
-            print("Waiting...")
-            time.sleep(1)
-        print("Flushing...")
-        producer.flush()
-        print("Flushed")
+    try:
+        async for message in websocket:
+            print(f"Received message: {message}")
+            producer.produce(topic=topic, value=message.encode('utf-8'))
+            # producer.flush(timeout=2)
+    except websockets.ConnectionClosed:
+        print("Client disconnected")
 
 
-if __name__ == '__main__':
-    main()
+async def main():
+    async with websockets.serve(handler, "localhost", 8765):
+        await asyncio.Future()  # Run forever
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
