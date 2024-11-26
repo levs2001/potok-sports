@@ -1,164 +1,73 @@
-# Потоковый анализ данных. Л1
+# Потоковый анализ данных. 
 
 ## Входные данные
 
-Данные о голах, карточках, ударах, ...
-https://allsportsapi.com/soccer-football-socket-documentation
+Данные о начале матча, конце матче, голах генерируются с помощью [генератора](./generator/match_event_generator.py)
+и пишутся в web socket.
 
-Пример сообщения:
+### Примеры сообщений
 
-```
-[
-  {
-        "event_key": "11205",
-        "event_date": "2021-05-21",
-        "event_time": "11:05",
-        "event_home_team": "Newcastle Jets",
-        "home_team_key": "1056",
-        "event_away_team": "Brisbane Roar",
-        "away_team_key": "399",
-        "event_halftime_result": "0 - 1",
-        "event_final_result": "1 - 2",
-        "event_ft_result": "1 - 2",
-        "event_penalty_result": "",
-        "event_status": "74",
-        "country_name": "Australia",
-        "league_name": "A-League - Regular Season",
-        "league_key": "49",
-        "league_round": "22",
-        "league_season": "",
-        "event_live": "1",
-        "event_stadium": "McDonald Jones Stadium",
-        "event_referee": "",
-        "event_country_key": "17",
-        "league_logo": "https://apiv2.allsportsapi.com/logo/logo_leagues/49_a-league.png",
-        "country_logo": "https://apiv2.allsportsapi.com/logo/logo_country/17_australia.png",
-        "event_home_formation": "",
-        "event_away_formation": "",
-        "fk_stage_key": "528",
-        "stage_name": "Regular Season",
-        "goalscorers": [
-            {
-                "time": "34",
-                "home_scorer": "",
-                "score": "0 - 1",
-                "away_scorer": "R. Danzaki"
-            },
-            {
-                "time": "61",
-                "home_scorer": "J. O'Shea (o.g.)",
-                "score": "1 - 1",
-                "away_scorer": ""
-            },
-            {
-                "time": "73",
-                "home_scorer": "",
-                "score": "1 - 2",
-                "away_scorer": "J. O'Shea"
-            }
-        ],
-        "cards": [
-            {
-                "time": "21",
-                "home_fault": "",
-                "card": "yellow card",
-                "away_fault": "M. Gillesphey"
-            },
-            {
-                "time": "42",
-                "home_fault": "J. Hoffman",
-                "card": "yellow card",
-                "away_fault": ""
-            },
-            ........................
-        ],
-        "substitutes": [
-            {
-                "time": "46",
-                "home_scorer": {
-                    "in": "C. O'Toole",
-                    "out": "L. Mauragis"
-                },
-                "score": "substitution",
-                "away_scorer": []
-            },
-            {
-                "time": "46",
-                "home_scorer": {
-                    "in": "A. Abbas",
-                    "out": "A. Goodwin"
-                },
-                "score": "substitution",
-                "away_scorer": []
-            },
-            ..............
-        ],
-        "lineups": {
-            "home_team": {
-                "starting_lineups": [
-                    {
-                        "player": "Jack Duncan",
-                        "player_number": "23",
-                        "player_country": null
-                    },
-                    {
-                        "player": "Johnny Koutroumbis",
-                        "player_number": "2",
-                        "player_country": null
-                    },
-                    .......................
-                ],
-                "substitutes": [
-                    {
-                        "player": "Lewis Italiano",
-                        "player_number": "1",
-                        "player_country": null
-                    },
-                    .................
-                ],
-                "coaches": [
-                    {
-                        "coache": "W. Moon",
-                        "coache_country": null
-                    }
-                ]
-            }
-        },
-        "statistics": [
-            {
-                "type": "Shots Blocked",
-                "home": "1",
-                "away": "6"
-            }
-            ..................
-        ]
-  },
-  .......
-]
-```
+Старт матча:
 
 ```
-goalscorers - забившие голы.
-goalscorers.home_scorer - игрок забивщий из домашней команды
-goalscorers.away_scorer - игрок забивщий из команды на выезде
-event_home_team - домашняя команда
-event_away_team - команда на выезде
+{
+    "event_type": "match_start",
+    "league": "Premier League",
+    "teams": "Tottenham Hotspur - Manchester United"
+}
+```
+
+Гол:
+
+```
+{
+    "event_type": "goal",
+    "league": "Premier League",
+    "teams": "Tottenham Hotspur - Manchester United",
+    "goal_author_team": "Manchester United",
+    "missed_goal_team": "Tottenham Hotspur"
+}
+```
+
+Конец матча:
+
+```
+{
+    "event_type": "match_end",
+    "league": "Premier League",
+    "teams": "Tottenham Hotspur - Manchester United"
+}
 ```
 
 ## Конечная цель:
 
-Дашборд с разбиением по лигам с топовыми бомбардирами
+Статистика со счетом по всем завершенным матчам и идущим:
+
+```
+Premier League:
+    
+    start time: 19/10/24 : 20:00 
+    commands: Tottenham Hotspur - Manchester United
+    score: 2 : 0 
+    status: in progress
+    ...
+
+Bundesliga:
+    start time: 19/10/24 : 20:00 
+    commands: Koln - Mainz
+    score: 2 : 0 
+    status: finished
+        
+```
+
+Дашборд с разбиением по лигам со статистикой по забитым голам
 
 ```
 English Premier league:
-    De Bruyne: 10
-    Harry Cane: 8
+    Tottenham Hotspur: 10
+    Manchester United: 8
     ...
-    
-La ligue:
-    Robert Levandovskiy: 15
-    Kilian Mbappe: 10
-    
+        
 ```
 
 Необходимо отсеивать дубликатов и учитывать тесок по клубам.
