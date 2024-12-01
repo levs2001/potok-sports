@@ -41,33 +41,19 @@
 
 ## Конечная цель:
 
-Статистика со счетом по всем завершенным матчам и идущим:
+Статистика со счетом по всем завершенным матчам:
 
 ```
 Premier League:
     
-    start time: 19/10/24 : 20:00 
+    end time: 19/10/24 : 20:00 
     commands: Tottenham Hotspur - Manchester United
     score: 2 : 0 
-    status: in progress
     ...
 
 Bundesliga:
-    start time: 19/10/24 : 20:00 
+    end time: 19/10/24 : 20:00 
     commands: Koln - Mainz
     score: 2 : 0 
-    status: finished
         
 ```
-
-Дашборд с разбиением по лигам со статистикой по забитым голам
-
-```
-English Premier league:
-    Tottenham Hotspur: 10
-    Manchester United: 8
-    ...
-        
-```
-
-Необходимо отсеивать дубликатов и учитывать тесок по клубам.
