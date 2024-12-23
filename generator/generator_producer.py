@@ -11,7 +11,6 @@ producer = Producer({
 
 async def handler(websocket, path):
     print("Client connected")
-
     try:
         async for message in websocket:
             print(f"Received message: {message}")

@@ -44,8 +44,7 @@
 Статистика со счетом по всем завершенным матчам:
 
 ```
-Premier League:
-    
+Premier League:    
     end time: 19/10/24 : 20:00 
     commands: Tottenham Hotspur - Manchester United
     score: 2 : 0 

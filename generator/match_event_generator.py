@@ -93,10 +93,11 @@ async def generate_match_events(websocket, first_goal_wait, other_match_time):
 MATCHES_IN_ONE_TIME = 5
 FIRST_GOAL_WAIT = 2
 OTHER_MATCH_TIME = 8
+URL = "ws://localhost:8765"
 
 
 async def main():
-    async with websockets.connect('ws://localhost:8765') as websocket:
+    async with websockets.connect(URL) as websocket:
         while True:
             async with asyncio.TaskGroup() as tg:
                 for i in range(MATCHES_IN_ONE_TIME):
